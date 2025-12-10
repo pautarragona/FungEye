@@ -10,7 +10,6 @@ __pycache__/
 *.so
 
 # Carpetas de datos (imágenes)
-mushrooms/
 data/
 dataset/
 
