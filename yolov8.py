@@ -1,20 +1,5 @@
 """
-Clasificador de Setas con YOLOv8 - Explicado y Mejorado
-=======================================================
-
-Este script implementa un clasificador robusto de setas usando YOLOv8 para clasificación. El código está estructurado en secciones, cada una explicada detalladamente antes de su bloque correspondiente. Se han eliminado los comentarios originales y se han añadido explicaciones didácticas. Todos los gráficos y resultados se guardan en la carpeta 'yolo'.
-
-Gráficos generados (todos en 'yolo/'):
-- Curvas de accuracy y loss (entrenamiento y validación)
-- Top-5 accuracy
-- Análisis del gap (overfitting)
-- Matriz de confusión
-- Accuracy por clase
-- Distribución de confianza de las predicciones
-- Curva de calibración (accuracy vs confianza)
-- Evolución del learning rate
-
-Cada gráfico incluye una explicación en el código.
+Todos los gráficos y resultados se guardan en la carpeta 'yolo'.
 """
 
 # Importar librerías necesarias
@@ -189,7 +174,7 @@ def plot_yolo_results(model, predictions, true_labels, confidences, classes, tim
         df = pd.read_csv(results_csv)
         df.columns = [c.strip() for c in df.columns]
     else:
-        print(f"[WARN] No se encontró el archivo de resultados en {results_csv}")
+        print(f"Cuidado! No se encontró el archivo de resultados en {results_csv}")
         return
 
     # Si hay clase 'otras', añadirla a los nombres para la matriz de confusión
@@ -328,9 +313,9 @@ def main():
     if best_src.exists():
         dest_path = export_dir / 'best.pt'
         shutil.copy2(best_src, dest_path)
-        print(f"\n✅ Pesos exportados a: {dest_path}")
+        print(f"\nPesos exportados a: {dest_path}")
     else:
-        print("\n⚠️ No se encontró 'best.pt' en la ruta esperada. Verifica el nombre del experimento o si el entrenamiento terminó correctamente.")
+        print("\nNo se encontró 'best.pt' en la ruta esperada. Verifica el nombre del experimento o si el entrenamiento terminó correctamente.")
     print(f"\nTodos los resultados y gráficos se han guardado en la carpeta '{RESULTS_DIR}'.")
 
 if __name__ == "__main__":

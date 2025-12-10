@@ -1,3 +1,5 @@
+// test de la carpeta de imágenes de setas "hygrocybe" del web scrapping
+
 image,prediction,confidence
 hygrocybe_1764253762946_2982.jpg,Hygrocybe,0.9998993873596191
 hygrocybe_1764253764370_9130.jpg,otras,0.5855605602264404

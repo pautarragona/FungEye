@@ -1,22 +1,8 @@
 """
-Clasificador de Setas con MobileNetV2 (Imagenet) - Explicado y Mejorado
-=======================================================================
 
-Este script implementa un clasificador robusto de setas usando MobileNetV2 preentrenado en ImageNet. 
-El código está estructurado en secciones, cada una explicada detalladamente antes de su bloque 
-correspondiente. Se han eliminado los comentarios originales y se han añadido explicaciones didácticas. 
-Además, el script detecta y usa GPU (CUDA) si está disponible, y todos los gráficos y resultados se 
-guardan en la carpeta 'imagenet'.
-
-Gráficos generados ((todos en 'imagenet/')):
-- Curvas de accuracy y loss (entrenamiento y validación)
-- Top-3 accuracy
-- Análisis del gap (overfitting)
-- Matriz de confusión
-- Accuracy por clase
-- Distribución de confianza de las predicciones
-- Curva de calibración (accuracy vs confianza)
-- Evolución del learning rate
+Todos los gráficos y resultados se guardan en la carpeta 'imagenet'.
+Puedes encontrar también los resultados (.png) donde el número se refiere al threshold que usamos para cada versión.
+En 'imagenet/README.txt' hay una tabla para consultar que fecha corresponde a qué experimento también.
 
 ENTRENAMIENTO::
 - Fase 1: Entrenamiento de la cabeza del modelo. NO se modifican los pesos del modelo base MobileNetV2, solo se usan para extraer características, y solo se entrenan las capas nuevas.
@@ -62,7 +48,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
     try:
-        # Habilitar crecimiento dinámico de memoria GPU
         for gpu in gpus:
             tf.config.experimental.set_memory_growth(gpu, True)
         print(f"\nGPU detectada: {len(gpus)} dispositivo(s) - {gpus[0].name}")
@@ -85,7 +70,7 @@ VAL_SPLIT = 0.15
 TEST_SPLIT = 0.15
 TRAIN_SPLIT = 0.70
 AUTOTUNE = tf.data.AUTOTUNE # tensorflow optimiza el rendimiento de carga de datos
-MIXUP_ALPHA = 0.1 # intensidad de mezcla de imágenes y etiquetas
+MIXUP_ALPHA = 0.2 # intensidad de mezcla de imágenes y etiquetas
 RESULTS_DIR = 'imagenet'
 os.makedirs(RESULTS_DIR, exist_ok=True) # guardar datos
 
@@ -104,7 +89,7 @@ def mixup(images, labels, alpha=0.2):
     mixed_labels = lambda_value * labels + (1 - lambda_value) * tf.gather(labels, indices) # mezcla etiquetas de la misma forma
     return mixed_images, mixed_labels
 
-# Augmentación agresiva aplicando transformaciones aleatorias para combatir el overfitting
+# Data autgmentation aplicando transformaciones aleatorias para combatir el overfitting
 def aggressive_augment(image):
     # Cambia el brillo, contraste, saturación, tono de color, rota 90º, flip horizontal, flip vertical
     image = tf.image.random_brightness(image, max_delta=0.2)
@@ -311,7 +296,7 @@ def evaluate_model(model, test_ds, class_names, timestamp, use_tta=True, unknown
     return predictions, predicted_classes_with_unk, true_classes, report_dict
 
 # =================================
-# VISUALIZACIÓN FINAL DE RESULTADOS
+# Aquí empieza la generación de gráficos
 # =================================
 
 # Genera y guarda todos los gráficos en 'imagenet/'
