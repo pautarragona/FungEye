@@ -137,7 +137,7 @@ def train_yolo_classifier(data_dir, model_name, classes):
 
 # Evaluación y visualización de resultados
 
-def evaluate_yolo_model(model, test_dir, classes, timestamp, unknown_threshold=0.5):
+def evaluate_yolo_model(model, test_dir, classes, timestamp, unknown_threshold=0.7):
     test_path = Path(test_dir) / 'test'
     all_predictions = []
     all_true_labels = []
@@ -233,24 +233,18 @@ def plot_yolo_results(model, predictions, true_labels, confidences, classes, tim
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    # 4. Gap Analysis - Aproximado usando loss gap
+    # 4. F1-Score per Class
     plt.subplot(2, 4, 4)
-    if 'train/loss' in df.columns and 'val/loss' in df.columns:
-        # Aproximar el gap usando la diferencia de loss normalizada
-        gap = df['val/loss'] - df['train/loss']
-        plt.plot(gap, linewidth=2.5, color='#9b59b6')
-        plt.axhline(y=0.10, color='orange', linestyle='--', alpha=0.7, label='Target Gap (10%)')
-        plt.axhline(y=0.20, color='red', linestyle='--', alpha=0.7, label='Previous Gap (20%)')
-        plt.title('Overfitting Gap (Train - Val)', fontsize=14, fontweight='bold')
-        plt.xlabel('Epoch')
-        plt.ylabel('Accuracy Gap')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-    else:
-        plt.text(0.5, 0.5, 'Gap analysis not available\n(YOLO no registra train accuracy)', 
-                 ha='center', va='center', fontsize=12)
-        plt.title('Overfitting Gap (Train - Val)', fontsize=14, fontweight='bold')
-        plt.axis('off')
+    from sklearn.metrics import f1_score
+    f1_scores = f1_score(true_labels, predictions, labels=range(len(plot_class_names)), average=None)
+    
+    colors_f1 = ['#9b59b6' if f > 0.8 else '#3498db' for f in f1_scores]
+    plt.barh(plot_class_names, f1_scores, color=colors_f1, alpha=0.8)
+    plt.xlabel('F1-Score')
+    plt.title('Per-Class F1-Score', fontsize=14, fontweight='bold')
+    plt.xlim([0, 1])
+    for i, v in enumerate(f1_scores):
+        plt.text(v + 0.01, i, f'{v:.2f}', va='center', fontweight='bold')
     
     # 5. Confusion Matrix
     plt.subplot(2, 4, 5)

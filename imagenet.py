@@ -243,7 +243,7 @@ def train_phase1(model, train_ds, val_ds, class_weights, timestamp):
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=0.002),
         loss=keras.losses.CategoricalCrossentropy(label_smoothing=0.05),
-        metrics=['accuracy', keras.metrics.TopKCategoricalAccuracy(k=3, name='top3_acc')]
+        metrics=['accuracy', keras.metrics.TopKCategoricalAccuracy(k=3, name='top3_acc'), keras.metrics.Precision(name='precision'), keras.metrics.Recall(name='recall')]
     )
     callbacks = create_callbacks(timestamp)
     history1 = model.fit(
@@ -259,7 +259,7 @@ def train_phase2(model, base_model, train_ds, val_ds, class_weights, timestamp):
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=1e-4),
         loss=keras.losses.CategoricalCrossentropy(label_smoothing=0.05),
-        metrics=['accuracy', keras.metrics.TopKCategoricalAccuracy(k=3, name='top3_acc')]
+        metrics=['accuracy', keras.metrics.TopKCategoricalAccuracy(k=3, name='top3_acc'), keras.metrics.Precision(name='precision'), keras.metrics.Recall(name='recall')]
     )
     callbacks = create_callbacks(timestamp + "_phase2")
     history2 = model.fit(
@@ -281,7 +281,7 @@ def predict_with_tta(model, test_ds, num_augmentations=5):
     return avg_predictions
 
 # Evalúa el modelo, añade la clase 'otras' si la confianza máxima es baja, y registra el reporte de clasificación en JSON.
-def evaluate_model(model, test_ds, class_names, timestamp, use_tta=True, unknown_threshold=0.3):
+def evaluate_model(model, test_ds, class_names, timestamp, use_tta=True, unknown_threshold=0.5):
     results = model.evaluate(test_ds, verbose=1)
     test_loss, test_acc, test_top3 = results[:3]
     if use_tta:
@@ -325,7 +325,11 @@ def plot_results(history1, history2, predictions, true_classes, predicted_classe
         'loss': history1.history['loss'] + history2.history['loss'],
         'val_loss': history1.history['val_loss'] + history2.history['val_loss'],
         'top3_acc': history1.history['top3_acc'] + history2.history['top3_acc'],
-        'val_top3_acc': history1.history['val_top3_acc'] + history2.history['val_top3_acc']
+        'val_top3_acc': history1.history['val_top3_acc'] + history2.history['val_top3_acc'],
+        'precision': history1.history.get('precision', []) + history2.history.get('precision', []),
+        'val_precision': history1.history.get('val_precision', []) + history2.history.get('val_precision', []),
+        'recall': history1.history.get('recall', []) + history2.history.get('recall', []),
+        'val_recall': history1.history.get('val_recall', []) + history2.history.get('val_recall', [])
     }
     
     # Si hay clase 'otras', añadirla a los nombres para la matriz de confusión
@@ -370,16 +374,28 @@ def plot_results(history1, history2, predictions, true_classes, predicted_classe
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    # 4. Gap Analysis
+    # 4. F1-Score Analysis
     plt.subplot(2, 4, 4)
-    gap = np.array(combined_history['accuracy']) - np.array(combined_history['val_accuracy'])
-    plt.plot(gap, linewidth=2.5, color='#9b59b6')
-    plt.axhline(y=0.10, color='orange', linestyle='--', alpha=0.7, label='Target Gap (10%)')
-    plt.axhline(y=0.20, color='red', linestyle='--', alpha=0.7, label='Previous Gap (20%)')
+    
+    # Calcular F1-Score para Train
+    p_train = np.array(combined_history.get('precision', []))
+    r_train = np.array(combined_history.get('recall', []))
+    f1_train = 2 * (p_train * r_train) / (p_train + r_train + 1e-7)
+    
+    # Calcular F1-Score para Val
+    p_val = np.array(combined_history.get('val_precision', []))
+    r_val = np.array(combined_history.get('val_recall', []))
+    f1_val = 2 * (p_val * r_val) / (p_val + r_val + 1e-7)
+    
+    if len(f1_train) > 0:
+        plt.plot(f1_train, label='Train F1', linewidth=2.5, color='#9b59b6')
+    if len(f1_val) > 0:
+        plt.plot(f1_val, label='Val F1', linewidth=2.5, color='#f1c40f')
+        
     plt.axvline(x=len(history1.history['accuracy']), color='gray', linestyle='--', alpha=0.5)
-    plt.title('Overfitting Gap (Train - Val)', fontsize=14, fontweight='bold')
+    plt.title('F1-Score (Train vs Val)', fontsize=14, fontweight='bold')
     plt.xlabel('Epoch')
-    plt.ylabel('Accuracy Gap')
+    plt.ylabel('F1-Score')
     plt.legend()
     plt.grid(True, alpha=0.3)
     

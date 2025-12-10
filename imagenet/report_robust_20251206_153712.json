@@ -1,0 +1,75 @@
+{
+  "Agaricus": {
+    "precision": 0.925,
+    "recall": 0.6981132075471698,
+    "f1-score": 0.7956989247311828,
+    "support": 53.0
+  },
+  "Amanita": {
+    "precision": 0.9038461538461539,
+    "recall": 0.831858407079646,
+    "f1-score": 0.8663594470046083,
+    "support": 113.0
+  },
+  "Boletus": {
+    "precision": 1.0,
+    "recall": 0.7577639751552795,
+    "f1-score": 0.8621908127208481,
+    "support": 161.0
+  },
+  "Cortinarius": {
+    "precision": 0.8723404255319149,
+    "recall": 0.6507936507936508,
+    "f1-score": 0.7454545454545455,
+    "support": 126.0
+  },
+  "Entoloma": {
+    "precision": 0.9069767441860465,
+    "recall": 0.7222222222222222,
+    "f1-score": 0.8041237113402062,
+    "support": 54.0
+  },
+  "Hygrocybe": {
+    "precision": 0.8269230769230769,
+    "recall": 0.9148936170212766,
+    "f1-score": 0.8686868686868687,
+    "support": 47.0
+  },
+  "Lactarius": {
+    "precision": 0.9272727272727272,
+    "recall": 0.6510638297872341,
+    "f1-score": 0.765,
+    "support": 235.0
+  },
+  "Russula": {
+    "precision": 0.8553459119496856,
+    "recall": 0.7861271676300579,
+    "f1-score": 0.8192771084337349,
+    "support": 173.0
+  },
+  "Suillus": {
+    "precision": 0.868421052631579,
+    "recall": 0.717391304347826,
+    "f1-score": 0.7857142857142857,
+    "support": 46.0
+  },
+  "otras": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1-score": 0.0,
+    "support": 0.0
+  },
+  "accuracy": 0.7331349206349206,
+  "macro avg": {
+    "precision": 0.8086126092341184,
+    "recall": 0.6730227381584364,
+    "f1-score": 0.731250570408628,
+    "support": 1008.0
+  },
+  "weighted avg": {
+    "precision": 0.9084800991076458,
+    "recall": 0.7331349206349206,
+    "f1-score": 0.8082484268255454,
+    "support": 1008.0
+  }
+}

@@ -15,7 +15,7 @@ import numpy as np
 MODEL_PATH = 'yolo/weights/best.pt'  # Ruta principal esperada (copiada manualmente)
 CLASSES = ['Agaricus', 'Amanita', 'Boletus', 'Cortinarius', 'Entoloma', 'Hygrocybe', 'Lactarius', 'Russula', 'Suillus']
 IMG_SIZE = 224
-UNKNOWN_THRESHOLD = 0.5
+UNKNOWN_THRESHOLD = 0.7
 
 try:
     from ultralytics import YOLO
@@ -60,13 +60,18 @@ def predict_image(image_path: Path):
     results = model.predict(str(image_path), imgsz=IMG_SIZE, verbose=False)
     pred_idx = results[0].probs.top1
     conf = results[0].probs.top1conf.item()
-    label = CLASSES[pred_idx] if conf >= UNKNOWN_THRESHOLD else 'otras'
+    
+    if conf < UNKNOWN_THRESHOLD:
+        label = 'otras'
+    else:
+        label = CLASSES[pred_idx]
+
     # top-3
     top3_indices = results[0].probs.top5[:3]
     top3 = []
     for i in top3_indices:
         prob = results[0].probs.data[i].item()
-        cls_name = CLASSES[i] if prob >= UNKNOWN_THRESHOLD else 'otras'
+        cls_name = CLASSES[i] # Mostrar nombre real para evitar duplicados de 'otras'
         top3.append((cls_name, prob))
     return label, conf, top3
 
@@ -99,13 +104,23 @@ def process_folder(folder: Path, save=False):
         print("No hay imágenes en la carpeta."); return
     print(f"Procesando {len(images)} imágenes...")
     import pandas as pd
+    from collections import Counter
     rows = []
+    predictions_list = []
     for img_path in images:
         label, conf, top3 = predict_image(img_path)
         rows.append({'image': img_path.name, 'prediction': label, 'confidence': conf})
+        predictions_list.append(label)
         print(f"{img_path.name}: {label} ({conf:.1%})")
         if save:
             show_result(img_path, (label, conf, top3), save=True)
+    
+    print("\n--- Resumen de Clasificación ---")
+    print(f"Total imágenes: {len(images)}")
+    counts = Counter(predictions_list)
+    for cls_name, count in counts.most_common():
+        print(f"  - {cls_name}: {count} ({count/len(images):.1%})")
+
     df = pd.DataFrame(rows)
     out_dir = Path('test_results'); out_dir.mkdir(exist_ok=True)
     csv_path = out_dir / 'yolo_batch.csv'
