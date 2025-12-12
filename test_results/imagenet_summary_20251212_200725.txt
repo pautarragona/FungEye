@@ -1,0 +1,9 @@
+Resumen de ejecución - 20251212_200725
+Total imágenes: 133
+------------------------------
+  - otras: 95 (71.4%)
+  - Hygrocybe: 21 (15.8%)
+  - Amanita: 10 (7.5%)
+  - Entoloma: 5 (3.8%)
+  - Suillus: 1 (0.8%)
+  - Agaricus: 1 (0.8%)

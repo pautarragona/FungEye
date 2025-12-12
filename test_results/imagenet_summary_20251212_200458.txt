@@ -1,0 +1,9 @@
+Resumen de ejecución - 20251212_200458
+Total imágenes: 164
+------------------------------
+  - Amanita: 105 (64.0%)
+  - otras: 50 (30.5%)
+  - Agaricus: 4 (2.4%)
+  - Lactarius: 3 (1.8%)
+  - Hygrocybe: 1 (0.6%)
+  - Russula: 1 (0.6%)
