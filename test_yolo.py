@@ -6,17 +6,21 @@ Uso ejemplos:
     python test_yolo.py --folder "imagenes_nuevas" --save
 """
 
+# Importar librerías necesarias
 import argparse
 from pathlib import Path
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
+from datetime import datetime
 
-MODEL_PATH = 'yolo/weights/best.pt'  # Ruta principal esperada (copiada manualmente)
+# Configuración básica
+MODEL_PATH = 'yolo/weights/best.pt'  # Ruta donde debería estar el modelo
 CLASSES = ['Agaricus', 'Amanita', 'Boletus', 'Cortinarius', 'Entoloma', 'Hygrocybe', 'Lactarius', 'Russula', 'Suillus']
 IMG_SIZE = 224
 UNKNOWN_THRESHOLD = 0.7
 
+# Intentar importar YOLO
 try:
     from ultralytics import YOLO
 except ImportError:
@@ -24,6 +28,7 @@ except ImportError:
     raise SystemExit(1)
 
 def find_weights():
+    # Buscar los pesos si no están en la ruta por defecto
     # 1. Ruta principal
     main_path = Path(MODEL_PATH)
     if main_path.exists():
@@ -37,95 +42,127 @@ def find_weights():
             if w.exists():
                 candidates.append(w)
         if candidates:
-            # Elegir el más reciente por fecha de modificación
+            # Coger el más nuevo
             candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
             return candidates[0]
     return None
 
 weights_path = find_weights()
 if not weights_path:
-    print("No se encontraron pesos entrenados de YOLO.")
-    print("Debes entrenar el modelo ejecutando:")
+    print("No encuentro el modelo entrenado.")
+    print("Tienes que entrenarlo primero con:")
     print("    conda activate iao")
     print("    python yolov8.py")
-    print("Esto generará una carpeta en 'runs/classify/.../weights/best.pt'.")
-    print("Luego puedes copiar el archivo a 'yolo/weights/best.pt' o dejar que este script lo detecte automáticamente.")
     raise SystemExit(1)
 
-print(f"Usando pesos: {weights_path}")
+print(f"Cargando modelo desde: {weights_path}")
 model = YOLO(str(weights_path))
 
 
 def predict_image(image_path: Path):
+    # Hacer la predicción
     results = model.predict(str(image_path), imgsz=IMG_SIZE, verbose=False)
     pred_idx = results[0].probs.top1
     conf = results[0].probs.top1conf.item()
     
+    # Si no está muy seguro, decimos que es 'otras'
     if conf < UNKNOWN_THRESHOLD:
         label = 'otras'
     else:
         label = CLASSES[pred_idx]
 
-    # top-3
+    # Sacar el top 3 para ver con qué se confunde
     top3_indices = results[0].probs.top5[:3]
     top3 = []
     for i in top3_indices:
         prob = results[0].probs.data[i].item()
-        cls_name = CLASSES[i] # Mostrar nombre real para evitar duplicados de 'otras'
+        cls_name = CLASSES[i]
         top3.append((cls_name, prob))
     return label, conf, top3
 
 
 def show_result(image_path: Path, result, save=False):
+    # Mostrar la imagen con el resultado
     label, conf, top3 = result
     img = Image.open(image_path).convert('RGB')
     plt.figure(figsize=(8,6))
     plt.imshow(img)
     plt.axis('off')
+    
+    # Colores según confianza (verde=bien, naranja=regular, rojo=mal)
     color = '#2ecc71' if conf > 0.8 else '#f39c12' if conf > 0.6 else '#e74c3c'
-    plt.title(f"YOLO: {label} ({conf:.1%})", color=color, fontsize=14, fontweight='bold')
+    plt.title(f"YOLO dice: {label} ({conf:.1%})", color=color, fontsize=14, fontweight='bold')
+    
+    # Poner el top 3 en la imagen
     y = 0.05
     for cls, c in top3:
         plt.text(0.02, y, f"{cls}: {c:.1%}", transform=plt.gca().transAxes, fontsize=10,
                  bbox=dict(facecolor='white', alpha=0.6, edgecolor='none'))
         y += 0.05
+        
     if save:
-        out_dir = Path('test_results'); out_dir.mkdir(exist_ok=True)
-        out_path = out_dir / f"{image_path.stem}_yolo.png"
+        # Guardar en la carpeta de resultados con timestamp para no borrar anteriores
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_dir = Path('test_results')
+        out_dir.mkdir(exist_ok=True)
+        out_path = out_dir / f"{image_path.stem}_yolo_{timestamp}.png"
         plt.savefig(out_path, dpi=150, bbox_inches='tight')
-        print(f"Guardado: {out_path}")
+        print(f"Imagen guardada en: {out_path}")
     plt.show(); plt.close()
 
 
 def process_folder(folder: Path, save=False):
+    # Procesar todas las imágenes de una carpeta
     exts = {'.jpg','.jpeg','.png','.JPG','.JPEG','.PNG'}
     images = [p for p in folder.iterdir() if p.suffix in exts]
+    
     if not images:
-        print("No hay imágenes en la carpeta."); return
+        print("No hay imágenes en esa carpeta.")
+        return
+        
     print(f"Procesando {len(images)} imágenes...")
     import pandas as pd
     from collections import Counter
+    
     rows = []
     predictions_list = []
+    
     for img_path in images:
         label, conf, top3 = predict_image(img_path)
         rows.append({'image': img_path.name, 'prediction': label, 'confidence': conf})
         predictions_list.append(label)
-        print(f"{img_path.name}: {label} ({conf:.1%})")
+        print(f" -> {img_path.name}: {label} ({conf:.1%})")
+        
         if save:
             show_result(img_path, (label, conf, top3), save=True)
     
-    print("\n--- Resumen de Clasificación ---")
-    print(f"Total imágenes: {len(images)}")
+    # Generar resumen
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_dir = Path('test_results')
+    out_dir.mkdir(exist_ok=True)
+    
+    print("\n--- Resumen ---")
+    print(f"Total: {len(images)}")
     counts = Counter(predictions_list)
+    
+    summary_lines = [f"Resumen de ejecución - {timestamp}", f"Total imágenes: {len(images)}", "-"*30]
+    
     for cls_name, count in counts.most_common():
-        print(f"  - {cls_name}: {count} ({count/len(images):.1%})")
+        line = f"  - {cls_name}: {count} ({count/len(images):.1%})"
+        print(line)
+        summary_lines.append(line)
 
+    # Guardar resultados en CSV con timestamp
+    csv_path = out_dir / f'yolo_batch_{timestamp}.csv'
     df = pd.DataFrame(rows)
-    out_dir = Path('test_results'); out_dir.mkdir(exist_ok=True)
-    csv_path = out_dir / 'yolo_batch.csv'
     df.to_csv(csv_path, index=False)
-    print(f"\nResumen guardado en {csv_path}")
+    print(f"\nCSV guardado en {csv_path}")
+    
+    # Guardar resumen en TXT
+    txt_path = out_dir / f'yolo_summary_{timestamp}.txt'
+    with open(txt_path, 'w') as f:
+        f.write('\n'.join(summary_lines))
+    print(f"Resumen guardado en {txt_path}")
 
 
 def main():
@@ -147,7 +184,8 @@ def main():
         print("Top-3:")
         for cls, c in res[2]:
             print(f"  - {cls}: {c:.1%}")
-        show_result(p, res, save=args.save)
+        # Guardar siempre la visualización en modo imagen única
+        show_result(p, res, save=True)
     else:
         f = Path(args.folder)
         if not f.exists():

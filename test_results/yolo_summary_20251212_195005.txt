@@ -1,0 +1,10 @@
+Resumen de ejecución - 20251212_195005
+Total imágenes: 227
+------------------------------
+  - Russula: 109 (48.0%)
+  - otras: 54 (23.8%)
+  - Lactarius: 24 (10.6%)
+  - Amanita: 15 (6.6%)
+  - Boletus: 12 (5.3%)
+  - Cortinarius: 9 (4.0%)
+  - Suillus: 4 (1.8%)

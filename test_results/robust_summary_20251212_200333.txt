@@ -1,0 +1,10 @@
+Resumen de ejecución - 20251212_200333
+Total imágenes: 106
+------------------------------
+  - otras: 66 (62.3%)
+  - Amanita: 18 (17.0%)
+  - Agaricus: 16 (15.1%)
+  - Russula: 2 (1.9%)
+  - Lactarius: 2 (1.9%)
+  - Boletus: 1 (0.9%)
+  - Entoloma: 1 (0.9%)

@@ -1,0 +1,11 @@
+Resumen de ejecución - 20251212_195145
+Total imágenes: 58
+------------------------------
+  - Suillus: 23 (39.7%)
+  - otras: 14 (24.1%)
+  - Boletus: 8 (13.8%)
+  - Lactarius: 4 (6.9%)
+  - Amanita: 4 (6.9%)
+  - Cortinarius: 3 (5.2%)
+  - Entoloma: 1 (1.7%)
+  - Hygrocybe: 1 (1.7%)
