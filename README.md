@@ -54,6 +54,37 @@ Para ejecutar el entrenamiento:
 python yolov8.py
 ```
 
+### 3. Web Scraping
+
+Se recomienda usar un entorno con Python 3.10+ con las siguientes librerías:
+
+```bash
+pip install requests beautifulsoup4
+```
+
+Para ejecutar la recolección de imagenes:
+```bash
+python scrape_mushrooms.py
+```
+
+Las imagenes obtenidas se almacenarán en la carpeta ./scraped_mushrooms/
+
+### 4. GAN
+
+Se recomienda usar un entorno con Python 3.8 con las siguientes librerías:
+```bash
+pip install tensorflow numpy matplotlib
+```
+Es necesario que la carpeta con las imagenes y el archivo del GAN se encuentren
+en el mismo directorio.
+
+Para ejecutar la generación de imágenes mediante GANs:
+```bash
+python data_augmentation_GAN.py
+```
+Las imagenes generadas se almacenarán en la carpeta ./mushrooms_augmented/
+
+
 ## Notas sobre el Entrenamiento
 
 *   Ambos scripts están configurados para usar aceleración por GPU si está disponible (CUDA).
