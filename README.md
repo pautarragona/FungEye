@@ -109,7 +109,18 @@ python data_augmentation_GAN.py
 ```
 Las imagenes generadas se almacenarán en la carpeta ./mushrooms_augmented/
 
+### 5. Entorno para CNN propia 
 
+Este entorno virtual usa **Python 3.12**.
+Se requiere que se instalen las librerias con las versiones que estan dentro de requirements.txt 
+
+```bash
+# Ejecutar el entrenamiento
+python mushroom_cnn_train.py
+
+# Ejecutar el test
+python mushroom_cnn_test.py
+```
 ## Notas sobre el Entrenamiento
 
 *   Ambos scripts están configurados para usar aceleración por GPU si está disponible (CUDA).
