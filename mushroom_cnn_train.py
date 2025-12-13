@@ -272,7 +272,7 @@ def validate(model, dataloader, criterion, device):
 
 
 def plot_advanced_training_history(history, true_classes, predicted_classes, predictions, class_names):
-    """Grafica análisis avanzado del entrenamiento (8 subplots)"""
+    """Grafica análisis avanzado del entrenamiento """
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     fig = plt.figure(figsize=(20, 10))

@@ -178,158 +178,11 @@ def evaluar_modelo(model, dataloader, class_names, device):
     return np.array(all_preds), np.array(all_labels), np.array(all_probs)
 
 
-# VISUALIZACIÓN AVANZADA (8 PLOTS - IGUAL QUE TRAIN)
 
-
-def plot_advanced_evaluation(y_true, y_pred, y_probs, class_names, checkpoint):
-    """Genera las MISMAS 8 visualizaciones que el entrenamiento"""
-
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    fig = plt.figure(figsize=(20, 10))
-
-    # Extraer historial si existe
-    history = checkpoint.get('history', None)
-
-    if history is None:
-        print("  No se encontró historial en el checkpoint")
-        history = {
-            'train_loss': [], 'train_acc': [], 'train_top3_acc': [], 'train_f1': [],
-            'val_loss': [], 'val_acc': [], 'val_top3_acc': [], 'val_f1': [],
-            'learning_rates': []
-        }
-
-    # 1. Training & Validation Loss
-    plt.subplot(2, 4, 1)
-    if len(history.get('train_loss', [])) > 0:
-        plt.plot(history['train_loss'], label='Train', linewidth=2.5, color='#3498db')
-        plt.plot(history['val_loss'], label='Val', linewidth=2.5, color='#e74c3c')
-        plt.title('Loss', fontsize=14, fontweight='bold')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-    else:
-        plt.text(0.5, 0.5, 'Loss History\nNot Available', ha='center', va='center', fontsize=12)
-        plt.axis('off')
-
-    # 2. Training & Validation Accuracy
-    plt.subplot(2, 4, 2)
-    if len(history.get('train_acc', [])) > 0:
-        plt.plot(history['train_acc'], label='Train', linewidth=2.5, color='#2ecc71')
-        plt.plot(history['val_acc'], label='Val', linewidth=2.5, color='#e74c3c')
-        plt.title('Accuracy', fontsize=14, fontweight='bold')
-        plt.xlabel('Epoch')
-        plt.ylabel('Accuracy (%)')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-    else:
-        plt.text(0.5, 0.5, 'Accuracy History\nNot Available', ha='center', va='center', fontsize=12)
-        plt.axis('off')
-
-    # 3. Top-3 Accuracy
-    plt.subplot(2, 4, 3)
-    if len(history.get('train_top3_acc', [])) > 0:
-        plt.plot(history['train_top3_acc'], label='Train', linewidth=2.5, color='#2ecc71')
-        plt.plot(history['val_top3_acc'], label='Val', linewidth=2.5, color='#e74c3c')
-        plt.title('Top-3 Accuracy', fontsize=14, fontweight='bold')
-        plt.xlabel('Epoch')
-        plt.ylabel('Top-3 Accuracy (%)')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-    else:
-        plt.text(0.5, 0.5, 'Top-3 Accuracy\nNot Available', ha='center', va='center', fontsize=12)
-        plt.axis('off')
-
-    # 4. F1-Score (Train vs Val) - EXACTAMENTE IGUAL QUE TRAIN
-    plt.subplot(2, 4, 4)
-    if len(history.get('train_f1', [])) > 0 and len(history.get('val_f1', [])) > 0:
-        plt.plot(history['train_f1'], label='Train F1', linewidth=2.5, color='#2ecc71')
-        plt.plot(history['val_f1'], label='Val F1', linewidth=2.5, color='#e74c3c')
-        plt.axhline(y=0.90, color='green', linestyle='--', alpha=0.7, label='Excellent (0.90)')
-        plt.axhline(y=0.80, color='orange', linestyle='--', alpha=0.7, label='Good (0.80)')
-        plt.title('F1-Score (Train vs Val)', fontsize=14, fontweight='bold')
-        plt.xlabel('Epoch')
-        plt.ylabel('F1-Score')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        plt.ylim([0, 1])
-    else:
-        plt.text(0.5, 0.5, 'F1-Score\nNot Available', ha='center', va='center', fontsize=12)
-        plt.axis('off')
-
-    # 5. Confusion Matrix - EXACTAMENTE IGUAL QUE TRAIN
-    plt.subplot(2, 4, 5)
-    cm = confusion_matrix(y_true, y_pred, labels=range(len(class_names)))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='YlOrRd',
-                xticklabels=class_names, yticklabels=class_names,
-                cbar_kws={'label': 'Count'})
-    plt.title('Confusion Matrix', fontsize=14, fontweight='bold')
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
-    plt.xticks(rotation=45, ha='right')
-    plt.yticks(rotation=0)
-
-    # 6. Per-class Accuracy - EXACTAMENTE IGUAL QUE TRAIN
-    plt.subplot(2, 4, 6)
-    class_acc = []
-    for i in range(len(class_names)):
-        mask = y_true == i
-        if mask.sum() > 0:
-            acc = (y_pred[mask] == y_true[mask]).mean()
-        else:
-            acc = 0.0
-        class_acc.append(acc)
-
-    colors = ['#2ecc71' if a > 0.80 else '#f39c12' if a > 0.65 else '#e74c3c' for a in class_acc]
-    plt.barh(class_names, class_acc, color=colors, alpha=0.8)
-    plt.xlabel('Accuracy')
-    plt.title('Per-Class Accuracy', fontsize=14, fontweight='bold')
-    plt.xlim([0, 1])
-    for i, v in enumerate(class_acc):
-        plt.text(v + 0.01, i, f'{v:.1%}', va='center', fontweight='bold', fontsize=9)
-
-    # 7. Confidence Distribution - EXACTAMENTE IGUAL QUE TRAIN
-    plt.subplot(2, 4, 7)
-    if y_probs is not None and len(y_probs.shape) > 1:
-        max_probs = np.max(y_probs, axis=1)
-        correct = y_pred == y_true
-        plt.hist(max_probs[correct], bins=30, alpha=0.7, label='Correct',
-                 color='#2ecc71', density=True)
-        plt.hist(max_probs[~correct], bins=30, alpha=0.7, label='Incorrect',
-                 color='#e74c3c', density=True)
-        plt.xlabel('Confidence')
-        plt.ylabel('Density')
-        plt.title('Confidence Distribution', fontsize=14, fontweight='bold')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-    else:
-        plt.text(0.5, 0.5, 'Confidence Distribution\nNot Available', ha='center', va='center', fontsize=12)
-        plt.axis('off')
-
-    # 8. Learning Rate Schedule - EXACTAMENTE IGUAL QUE TRAIN
-    plt.subplot(2, 4, 8)
-    if len(history.get('learning_rates', [])) > 0:
-        epochs = list(range(len(history['learning_rates'])))
-        plt.semilogy(epochs, history['learning_rates'], linewidth=2.5, color='#3498db', marker='o')
-        plt.title('Learning Rate Schedule', fontsize=14, fontweight='bold')
-        plt.xlabel('Epoch')
-        plt.ylabel('Learning Rate (log scale)')
-        plt.grid(True, alpha=0.3)
-    else:
-        plt.text(0.5, 0.5, 'Learning Rate\nNot Available', ha='center', va='center', fontsize=12)
-        plt.axis('off')
-
-    plt.tight_layout()
-    save_path = f'evaluation_results_{timestamp}.png'
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    print(f"\n Gráficas de evaluación guardadas en: {save_path}")
-    plt.show()
-
-    return save_path
 
 
 def plot_class_metrics(report_dict, class_names):
-    """Grafica métricas por clase (mantiene el formato original)"""
+    """Grafica métricas por clase """
     # Extraer métricas usando los nombres de clases como claves
     precision = []
     recall = []
@@ -446,9 +299,9 @@ def analizar_errores(y_true, y_pred, y_probs, class_names, X_test, top_n=5):
         print(f"   {status} Real: {true_class} | Pred: {pred_class} | "
               f"Confianza: {conf:.2f}%")
 
-# ============================================================================
+
 # MAIN
-# ============================================================================
+
 
 def main():
     print("\n" + "="*70)
@@ -477,7 +330,7 @@ def main():
         checkpoint_final = torch.load('mushroom_cnn_final.pth', map_location=DEVICE)
         print(" Checkpoint final cargado (incluye historial de entrenamiento)")
     except:
-        print("⚠  No se encontró mushroom_cnn_final.pth")
+        print(" No se encontró mushroom_cnn_final.pth")
         checkpoint_final = checkpoint  # Usar checkpoint best como fallback
 
     # Cargar dataset de test
@@ -520,9 +373,6 @@ def main():
 
     print(classification_report(y_true, y_pred, target_names=class_names))
 
-    # Generar visualizaciones avanzadas (8 plots) - IGUALES QUE EN TRAIN
-    print("\n Generando visualizaciones avanzadas...")
-    plot_advanced_evaluation(y_true, y_pred, y_probs, class_names, checkpoint_final)
 
     # Métricas por clase
     print("\n Generando métricas detalladas por clase...")
@@ -534,7 +384,6 @@ def main():
     print(f"\n{'='*70}")
     print(" Evaluación completada")
     print(" Archivos generados:")
-    print("   - evaluation_results_YYYYMMDD_HHMMSS.png (8 gráficos avanzados)")
     print("   - class_metrics.png (métricas detalladas por clase)")
     print(f"{'='*70}\n")
 
