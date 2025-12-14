@@ -19,7 +19,7 @@ Qué es cada archivo y carpeta?
 ### Estructura de Carpetas
 Para que los scripts funcionen, la carpeta del proyecto debería ser algo así:
 
-*   `Mushrooms/`: **(descargar dataset de Kaggle)**. Dentro debe haber una carpeta por cada tipo de seta (`Agaricus`, `Amanita`, etc.) con sus fotos. Cuidado porque descargar el dataset de Kaggle puede crear dos carpetas `mushrooms/Mushrooms/Amanita`.
+*   `Mushrooms/`: **(descargar dataset de Kaggle: https://www.kaggle.com/datasets/maysee/mushrooms-classification-common-genuss-images)**. Dentro debe haber una carpeta por cada tipo de seta (`Agaricus`, `Amanita`, etc.) con sus fotos. Cuidado porque descargar el dataset de Kaggle puede crear dos carpetas `mushrooms/Mushrooms/Amanita`.
 *   `Mushrooms_YOLO/`: al crea YOLO a partir de la anterior
 *   `imagenet/`:  donde el modelo MobileNet guarda sus cosas (modelos entrenados, gráficas, logs...).
 *   `runs/`:  donde YOLO guarda sus entrenamientos.
