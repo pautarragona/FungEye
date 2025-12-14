@@ -112,7 +112,7 @@ Las imagenes generadas se almacenarán en la carpeta ./mushrooms_augmented/
 ### 5. Entorno para CNN propia 
 
 Este entorno virtual usa **Python 3.12**.
-Se requiere que se instalen las librerias con las versiones que estan dentro de requirements.txt 
+Se requiere que se instalen las librerias con las versiones que estan dentro de `requirements.txt`.
 
 ```bash
 # Ejecutar el entrenamiento
@@ -123,9 +123,9 @@ python mushroom_cnn_test.py
 ```
 ## Notas sobre el Entrenamiento
 
-*   Ambos scripts están configurados para usar aceleración por GPU si está disponible (CUDA).
+*   Ambos scripts están configurados para usar acelerar el proceso con la GPU si está disponible (CUDA).
 *   Se han aplicado técnicas de Data Augmentation (rotación, mixup, cambios de color) para mejorar la generalización.
-*   Los resultados (accuracy, loss, matrices de confusión) se generan automáticamente al finalizar la ejecución en sus respectivas carpetas.
+*   Los resultados (accuracy, loss, matrices de confusión) se guardan automáticamente al finalizar la ejecución en sus respectivas carpetas.
 
 ## Autores
 
