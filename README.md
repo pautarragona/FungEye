@@ -40,7 +40,7 @@ El proyecto utiliza dos entornos de Conda separados para evitar conflictos entre
 
 ### 1. Entorno para MobileNetV2 (`iao_tf`)
 
-Este entorno utiliza **Python 3.9** y **TensorFlow 2.10.1** (versión específica para soporte GPU nativo en Windows).
+Este entorno utiliza **Python 3.9** y **TensorFlow 2.10.1** (versión específica para soporte GPU nativo en Windows). Puedes consultar la lista completa de paquetes instalados en el archivo `requirements_imagenet.txt`.
 
 ```bash
 conda create -n iao_tf python=3.9
@@ -61,7 +61,7 @@ python imagenet.py
 
 ### 2. Entorno para YOLOv8 (`iao`)
 
-Este entorno usa **Python 3.8** y **PyTorch**.
+Este entorno usa **Python 3.8** y **PyTorch**. Puedes consultar la lista completa de paquetes instalados en el archivo `requirements_yolo.txt`.
 
 ```bash
 conda create -n iao python=3.8
